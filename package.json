@@ -3,11 +3,10 @@
   "version": "0.0.0",
   "description": "NodejsWebApp1",
   "scripts": {
-    "start": "nodemon server",
-    "build": "echo 'No build step necessary for this Node.js app.'"
+    "start": "nodemon server"
   },
   "engines": {
-    "node": "~6.10.x"
+    "node": "16.x"
   },
   "author": "",
   "devDependencies": {
