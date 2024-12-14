@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "description": "NodejsWebApp1",
   "scripts": {
-    "start": "nodemon server"
+    "start": "nodemon server",
+    "build": "echo 'Build process here'"  # This is a placeholder for now, modify it based on your actual build needs
   },
   "engines": {
     "node": "20.x"
