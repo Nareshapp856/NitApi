@@ -420,6 +420,6 @@ app.put("/api/nit_v1/Update_UserLogoutTime", async (req, res) => {
 
 // need different port to run this file alone
 
-app.listen(3013, () => {
-  console.log(`Server is running on port ${3013}`);
+app.listen(5013, () => {
+  console.log(`Server is running on port ${5013}`);
 });

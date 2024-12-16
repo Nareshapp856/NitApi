@@ -1208,7 +1208,7 @@ async function fetchQuestionsFromCache(numberOfQuestions) {
     // Fetch the remaining questions from the database
     const remainingQuestions =
       numberOfQuestions - (cachedQuestions ? cachedQuestions.length : 0);
-    const dbQuestions = await fetchQuestionsFromDatabase(remainingQuestions);
+    const dbQuestions = await fetchQuestionsFromDatabase1(remainingQuestions);
 
     // Update cache with combined questions
     const combinedQuestions = [...(cachedQuestions || []), ...dbQuestions];
@@ -1294,7 +1294,7 @@ async function fetchSubtopicsFromDatabase(topicId) {
   }
 }
 // Function to fetch a specific number of questions from the database
-async function fetchQuestionsFromDatabase1(tableName, numberOfQuestions) {
+async function fetchQuestionsFromDatabase(tableName, numberOfQuestions) {
   try {
     console.log(`Fetching questions from table: ${tableName}`);
     const result = await queryAsync(
@@ -2548,8 +2548,6 @@ app.post("/apinit/UserLogin_send-otp", async (req, res) => {
   }
 });
 
-
-
 app.post("/apinit/EnrollStudents", async (req, res) => {
   try {
     console.info("Method listofEnrollStudent");
@@ -3021,6 +3019,62 @@ app.post("/apinit/Fetch_Students", async (req, res) => {
   }
 });
 
+app.put("/apinit/updateStudentDetails", async (req, res) => {
+  try {
+    console.info("Update students");
+    await sql.connect(sqlConfig);
+
+    const requestData = req.body;
+
+    const { studentId, firstname, lastName, email, phoneNumber, batchId } =
+      requestData;
+
+    // Use parameterized queries to avoid SQL injection and errors
+    const result = await sql.query`
+      EXEC [dbo].[Usp_UpdateStudent] 
+        @studentId = ${studentId}, 
+        @firstname = ${firstname}, 
+        @lastName = ${lastName}, 
+        @email = ${email}, 
+        @phoneNumber = ${phoneNumber}, 
+        @batchId = ${batchId}`;
+
+    // Check if the result has any recordset (response from stored procedure)
+    if (result.recordset && result.recordset.length > 0) {
+      const recordsetData = result.recordset;
+      console.log("Stored procedure executed successfully:", recordsetData);
+
+      // If stored procedure returns records, send the data back
+      res.status(200).json({
+        success: true,
+        message: "Student details updated successfully.",
+        dbresult: recordsetData,
+      });
+    } else {
+      // Handle case where no data is returned (e.g., no update or no rows affected)
+      console.log(
+        "Stored procedure executed successfully, but no records returned."
+      );
+      res.status(200).json({
+        success: true,
+        message:
+          "Student details updated successfully, but no records were affected.",
+        dbresult: null,
+      });
+    }
+  } catch (err) {
+    // Log the error and send an error response
+    console.error("Error executing stored procedure:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error executing stored procedure",
+      apperror: err.message,
+    });
+  } finally {
+    sql.close();
+  }
+});
+
 app.post("/apinit/Create_StudentsBatchs", async (req, res) => {
   try {
     console.info("Request reached StudentsBatches");
@@ -3238,6 +3292,7 @@ app.post("/apinit/addStudentsBatch", async (req, res) => {
 
     // Execute the stored procedure
     const result = await sql.query`EXEC Usp_AddstudentsBatch @Students=${tvp}`;
+    console.log(result);
     res.status(200).json({
       success: true,
       message: "Students batch processed successfully.",
@@ -8091,7 +8146,7 @@ app.get("/apinit/fetchBatchesByMentorId", async (req, res) => {
     // Extract and validate query parameters
     const { mentorId } = req.query;
 
-    if (!mentorId) {
+    if (mentorId === null || mentorId === undefined || mentorId === '') {
       return res.status(400).json({
         success: false,
         message: "Missing required query parameter: mentorId",
@@ -8350,9 +8405,9 @@ app.get("/apinit/studentAssessmentData", async (req, res) => {
 
     await sql.connect(sqlConfig);
     const result = await sql.query(`
-            select * from  Assessment_v3 
+            select * from  Assessment_v1 
              WHERE 
-        TestDescription != 'Gap Day' 
+        TestDescription != 'Gap Day'
         `);
 
     res.json(result.recordset);
