@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "NodejsWebApp1",
   "scripts": {
-    "start": "nodemon server_V10",
+    "start": "node server_V10",
     "build": "node server_V10"
   },
   "engines": {
